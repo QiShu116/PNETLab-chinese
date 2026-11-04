@@ -4,8 +4,8 @@
 // @version      2.0.0
 // @description  From yuyan2560@qq.com，使用前先确定自己的PNET地址，更正到@match中
 // @author       Local
-// @match        http://192.168.254.33/*
-// @match        https://192.168.254.33/*
+// @match        http://127.0.0.1/*
+// @match        https://127.0.0.1/*
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
