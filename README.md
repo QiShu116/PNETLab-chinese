@@ -1,4 +1,4 @@
-# PNET-chinese
+# PNETLab-chinese
 通过油猴脚本汉化PNETv8
 
 基于PNetLab-27H1-v8.2-6.8.93resolute1汉化
