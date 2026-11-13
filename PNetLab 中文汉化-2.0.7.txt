@@ -1,0 +1,1276 @@
+// ==UserScript==
+// @name         PNetLab 中文汉化
+// @namespace    pnetlab-chinese
+// @version      2.0.7
+// @description  使用前先确定自己的PNET地址，更正到@match中
+// @author       Local
+// @match        http://10.21.66.25/*
+// @match        https://10.21.66.25/*
+// @run-at       document-idle
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    "use strict";
+
+    // =========================================================
+    // 字典配置区（支持按路由隔离）
+    // match: 匹配当前网址的正则表达式，匹配成功则启用该字典
+    // =========================================================
+    const dictScopes = [
+        {
+            // 全局默认生效（匹配任何路径）
+            match: /.*/,
+            dict: {
+                "Username": "用户名",
+                "Password": "密码",
+                "Sign in": "登入",
+                "Log out": "登出",
+                "Logout": "登出",
+                "Default account": "默认账户",
+                "Default Console": "默认控制台",
+                "Admin": "Admin",
+                "admin": "admin",
+
+                "Labs": "实验室",
+                "System degraded": "系统状态异常",
+                "warning": "告警",
+                "Checked": "检查时间",
+                "Lab name": "实验名称",
+                "Destination folder": "目标文件夹",
+                "item(s)": "个项目",
+                "select all": "全选",
+                "Select folders and labs to export.": "选择要导出的实验。",
+                "Select a lab to preview it.": "选择一个实验以预览。",
+                "Workspace items": "实验项目",
+                "Workspace": "工作区",
+                "NAME": "名称",
+                "Modified": "修改时间",
+                "New folder": "新建文件夹",
+                "Folder name": "文件夹名称",
+                "New lab": "新建实验",
+                "Import": "导入",
+                "Export": "导出",
+                "Refresh": "刷新",
+                "Search labs and folders": "搜索实验室和文件夹",
+                "Search": "搜索",
+                "All states": "所有实验",
+                "Unavailable": "不可用",
+                "Open": "打开",
+                "Refresh platform health": "刷新平台健康状态",
+                "More actions": "更多选项",
+                "Move": "移动",
+                "Rename": "重命名",
+                "Clone": "复制",
+                "Edit lab & permissions": "编辑实验室和权限",
+                "Edit details & permissions": "编辑实验室和权限",
+                "Change password": "修改密码",
+                "Switch to dark mode": "切换到深色主题",
+                "Switch to light mode": "切换到浅色主题",
+                "List view": "列表视图",
+                "Card view": "卡片视图",
+                "OPEN": "打开",
+                "Delete": "删除",
+                "EDIT": "编辑",
+                "DELETE": "删除",
+                "Lab Path:": "实验路径：",
+                "Version:": "版本：",
+                "Version": "版本",
+                "version": "版本",
+                "Author:": "作者：",
+                "Author": "作者",
+                "Config script timeout (s)": "配置脚本超时（s）",
+                "Countdown timer (s)": "倒计时器（s）",
+                "Access control": "访问控制",
+                "Who can open this lab": "谁能打开这个实验室",
+                "Who can join this lab": "谁能加入这个实验室",
+                "Who can edit this lab": "谁能编辑这个实验室",
+                "Admin only": "仅Admin",
+                "Everyone": "所有人",
+                "Specific users": "指定用户",
+                "extra emails or pod numbers, comma-separated": "额外的电子邮件或pod编号，以逗号分隔",
+                "Select a lab to inspect its topology and details.": "选择一个实验室，查看拓扑结构和详细信息。",
+                "Labs in this folder": "此文件夹中的实验室",
+                "Workspace location": "工作区位置",
+                "Current folder": "当前文件夹",
+                "Subfolders": "子文件夹",
+                "Modified newest": "最新修改",
+                "Modified oldest": "最旧修改",
+                "Path": "路径",
+                "Edit details": "编辑",
+                "Open lab": "打开实验室",
+                "No preview objects": "没有预览对象",
+                "This lab has no renderable topology items.": "这个实验室没有可渲染的拓扑。",
+
+
+                "Running Labs": "运行中的实验室",
+                "No open labs": "暂无实验室",
+                "No open lab sessions.": "没有正在运行的实验室。",
+                "A lab appears here once it is opened in the topology editor.": "打开实验室后，它就会显示在这里。",
+                "LAB": "实验",
+                "Owner": "用户",
+                "Where": "位置",
+                "Destroy all": "关闭全部",
+                "Destroy all running labs": "关闭所有运行中的实验",
+                "Every node is stopped & wiped and all sessions are closed. This cannot be undone": "每个节点都将停止并清空，所有会话都将关闭。此操作无法撤销",
+                "Type ": "输入", "to confirm.": "进行确认。",
+                "Lab": "实验室",
+                "Stop all nodes": "停止所有节点",
+                "Destroy": "销毁",
+                "None running": "None running",
+
+
+                "Lab Layout": "实验室布局",
+                "Global defaults": "全局设置",
+                "These apply to every lab you open in this browser. Changing a toggle in a lab’s Layout Settings overrides it for that lab only; use Reset to Global there, or the button below, to follow these again.": "这些设置适用于你打开的每个实验室。在实验室的“布局设置”中更改一个开关选项，只会对该实验室生效；若要再次遵循这些设置，请使用“重置为全局设置”选项，或点击下方的按钮。",
+                "Status LED": "状态灯",
+                "Large Text": "大文本",
+                "Larger text, icons and rows in the canvas and node right-click menus": "画布和节点右键菜单中的文本、图标和行数更大",
+                "(account-wide, no per-lab override)": "(全局账户应用)",
+                "Canvas": "画布",
+                "Link Utilization": "链接利用率",
+                "Dark Canvas": "深色画布",
+                "Structured Links": "结构化链接",
+                "Snap to Grid": "对齐网格",
+                "Per-lab overrides": "实验室覆盖设置",
+                "lab has its own layout settings.": "个实验室拥有自己的布局设置。",
+                "Reset all labs to these defaults": "所有实验室重置为默认设置",
+
+
+                "System": "系统",
+                "Memory": "内存",
+                "Disk": "磁盘",
+                "Resources": "资源",
+                "Running nodes": "运行中的节点",
+                "nodes running": "个节点运行中",
+                "Platform": "平台版本",
+                "Engine version": "系统版本",
+                "CPU cores": "CPU核心",
+                "CPU limit": "CPU限制",
+                "CPU Limit": "CPU限制",
+                "Danger zone": "危险区",
+                "These actions affect the whole appliance": "这些操作会影响整个设备",
+                "Restarting, shutting down, or resizing the root filesystem stops every running lab and drops all connections. Each action asks for confirmation first.": "重启、关闭或调整根文件系统的大小会停止所有正在运行的实验室并断开所有连接。每个操作都会先要求确认。",
+                "Disk expand": "磁盘扩容",
+                "Expand the root filesystem to use the full virtual disk after enlarging it in your hypervisor. Click Detect to see the current layout and the exact commands, then Expand to apply.": "在虚拟机管理程序中扩大虚拟磁盘后，扩展根文件系统以使用整个磁盘。点击“检测”查看当前布局和确切命令，然后点击“扩展”进行应用。",
+                "Detect": "检测",
+                "Detect complete": "检测完成",
+                "Expand": "扩展",
+                "Filesystem": "文件系统",
+                "Current size": "当前磁盘大小",
+                "Disk total": "磁盘总量",
+                "Expandable by": "可扩展容量",
+                "Expandable": "可扩展",
+                "Yes": "是",
+                "Commands that will run": "将要运行的命令",
+                "Server power": "服务器电源",
+                "Restart or shut down the PNetLab server. All running labs will stop.": "重启或关闭PNetLab服务器。所有正在运行的实验室都将停止。",
+                "Shut down": "关机",
+                "Idle timeout (minutes)": "空闲超时(分钟)",
+                "Themes": "主题",
+                "Choose the appliance-wide color profile for the dashboard, sign-in page, and lab chrome. The lab canvas light/dark toggle remains independent.": "为仪表板、登录页面和实验室Chrome选择全设备范围的颜色配置文件。实验室画布的明暗切换功能保持独立。",
+                "Restart the PNetLab server now? All running labs will stop and you will lose connection to the box.": "现在重启PNetLab服务器吗？所有正在运行的实验室都将停止，您将失去与设备的连接。",
+                "Shut down the PNetLab server now? All running labs will stop and you will lose connection to the box.": "现在要关闭PNetLab服务器吗？所有正在运行的实验室都将停止，您将失去与设备的连接。",
+                "Apply disk expansion now? The root filesystem will be grown to fill the virtual disk.": "是否立即应用磁盘扩展？系统将把剩余空间都分配给虚拟磁盘。",
+
+
+                "History": "使用率",
+                "Host CPU utilization, percent of all cores": "CPU使用率",
+                "Root filesystem usage": "根目录使用情况",
+                "Server uptime": "服务器运行时间",
+
+
+
+                "Images": "镜像",
+                "Get": "下载",
+                "Installed only": "已安装",
+                "Fix Permissions": "修复权限",
+                "Local Image Manager": "本地镜像管理",
+                "Manage Local Images": "本地镜像管理",
+                "Manage": "管理",
+                "New QEMU Folder": "新建QEMU文件夹",
+                "No QEMU images installed": "没有安装QEMU镜像",
+                "No IOL images installed": "没有安装IOL镜像",
+                "No Dynamips images installed": "没有安装Dynamips镜像",
+                "This cannot be undone": "该操作无法撤销",
+                "delete failed: bad arg name": "删除失败：参数名称错误",
+                "Image type": "镜像类型",
+                "QEMU folder (required for QEMU)": "QEMU文件夹",
+                "select folder": "选择文件夹",
+                "Drag & drop files or a folder here": "将文件或文件夹拖放到此处",
+                "Browse Files": "浏览文件",
+                "Browse Folder": "浏览文件夹",
+                "Loading catalog...": "正在加载目录...",
+                "Search images": "搜索镜像",
+
+
+                "icons": "图标",
+                "Search icons": "搜索图标",
+                "PNG, JPG or SVG, up to 2 MB.": "PNG、JPG或SVG格式，大小不超过2 MB。",
+                "Drop files on the list or use the button.": "将文件拖到列表中或使用按钮。",
+
+
+
+
+                "Docker Devices": "Docker 设备",
+                "Pull ready-made Docker container images to use as nodes in your labs.": "拉取Docker容器镜像，以用作实验室中的节点。",
+                "Installed": "已安装",
+                "Available": "可下载",
+                "installed": "已安装",
+                "Install": "安装",
+                "Install latest": "安装最新版本",
+                "not installed": "未安装",
+                "Pull an image": "拉取镜像",
+                "Pull image": "拉取镜像",
+                "Pull any Docker Hub image by reference — not just the catalog above. Accepts a bare ref or a pasted \"docker pull …\" command.": "拉取Docker Hub的镜像。接受裸引用或粘贴的“docker pull …”命令。",
+                "Installed images": "已安装的镜像",
+                "Every Docker image currently pulled on this server — from the catalog above or an ad-hoc pull.": "此服务器上的Docker镜像",
+                "weeks ago": "周前",
+                "months ago": "个月前",
+                "Last successful check": "上次成功检查时间",
+                "Check unavailable": "检查不可用",
+                "urlopen error": "打开链接失败",
+                "Cannot assign requested address": "无法分配请求的地址",
+                "Previous results may be stale.": "之前的结果可能已过时。",
+
+                "Zeek Protocol Visibility": "Zeek Protocol Visibility",
+                "Chrome (Noble)": "Chrome (Noble)",
+                "Web Packet Capture": "Web Packet Capture",
+                "minimal linux docker.": "minimal linux docker.",
+                "Chrome docker": "Chrome docker",
+                "Network services appliance": "Network services appliance",
+                "AD Lab DC": "AD Lab DC",
+                "VoIP Lab": "VoIP Lab",
+                "Telemetry Lab": "Telemetry Lab",
+                "Samba Active Directory Domain": "Samba Active Directory Domain",
+                "Firewall security-profile test bench": "Firewall security-profile test bench",
+                "Model-driven streaming telemetry": "Model-driven streaming telemetry",
+                "Open-source FRRouting Docker": "Open-source FRRouting Docker",
+                "security": "security",
+                "Transparent WAN": "Transparent WAN",
+
+
+
+                "Import Data": "导入数据",
+                "Import from another PNetLab server": "从其他服务器导入镜像",
+                "Pull QEMU images, IOL binaries and labs from an existing PNetLab / EVE-NG server over SSH": "通过SSH从PNetLab/EVE-NG服务器中提取镜像",
+                "Discover": "登入",
+                "SSH user": "SSH用户",
+                "SSH password": "SSH密码",
+                "Export labs": "导出实验",
+                "Export individual or multiple labs from the": "从“", "view (per-row Export, or select several and use the bulk bar).": "”视图中导出单个或多个实验室（逐行导出，或选择多个实验室并使用批量导出栏）。",
+
+
+                "Clusters": "集群",
+                "Cluster": "集群",
+                "Add satellite": "添加卫星",
+                "Pre-shared key": "预共享密钥",
+                "not set": "未设置",
+                "Generate": "生成",
+                "Satellites": "卫星",
+                "Generate a pre-shared key, then add a satellite — the master deploys PNetLab to it over SSH and it joins the cluster.": "生成一个预共享密钥，然后添加一个卫星节点。主节点通过SSH向其部署PNetLab，该节点随即加入集群。",
+                "No satellites joined yet.": "暂无卫星加入",
+                "Add a satellite host — the master deploys PNetLab to it over SSH and it joins the cluster.": "添加一个卫星节点，主节点通过SSH将PNetLab部署到该卫星节点上，然后将该卫星主机加入集群。",
+                "Satellite": "卫星",
+                "if SSH user is not root": "如果SSH用户不是root",
+                "Display name (optional)": "名称(可选)",
+
+
+                "Network": "网络",
+                "Management network": "管理网络",
+                "These settings control how this PNetLab server reaches the network. A wrong static address or gateway can make the appliance unreachable until fixed from the console. The previous config is backed up before every change.": "设置此PNetLab服务器如何接入网络。如果静态地址或网关设置错误，该设备将无法访问，只能通过控制台进行修复。每次更改前，都会备份之前的配置。",
+                "Management interface": "管理接口",
+                "Space- or comma-separated. Leave empty to use DHCP-provided DNS.": "以空格或逗号分隔。留空则使用DHCP提供的DNS。",
+                "Changing the IP address or addressing mode reboots the appliance to apply. DNS and search-domain changes apply immediately, no reboot.": "更改IP地址或寻址模式后，设备需要重启才能生效。DNS和搜索域的更改会立即生效，无需重启。",
+                "A satellite just needs to be a clean Ubuntu 26.04": "卫星只需是一个干净的Ubuntu 26.04",
+                "host reachable from this master, with SSH login already set up (root, or a sudo user — only needed if not root); nothing else has to be pre-installed, since the master pushes the bundle, runs the installer, and reboots it. The SSH credentials are used once, only to perform that install. The pre-shared key is separate: it authenticates ongoing master↔satellite control-plane traffic after the join, not the SSH step itself — it does not secure lab traffic or database access, so keep satellites on a trusted network segment.": "主机，可从该主节点访问，且已设置好SSH登录(使用root 用户，或个sudo用户一一仅当非root时所需);无需预装其他内容，因为主节点会推送软件包、运行安装程序并重启它。SSH凭据仅使用一次，仅用于执行该安装。预共享密钥是独立的:它在加入后对持续的主节点与卫星控制平面流量进行身份验证，而非SSH步骤本身一一它不保护实验室流量或数据库访问，因此请将卫星放在受信任的网络段上。",
+                "Save network config": "保存网络配置",
+                "Reload": "重载",
+                "Search domain": "Search domain",
+
+
+                "Branding": "品牌标识",
+                "Replace the product name and logo shown on the login page, this dashboard and the lab view. The Version page keeps reporting the real package version so the appliance stays diagnosable.": "替换登录页面、此仪表盘和实验室视图上显示的产品名称和图标。版本页面持续报告实际软件包版本，以便设备保持可诊断状态。",
+                "PNG or JPEG, up to 512 KB and 4000×4000. Shown at roughly 28–150 px, so a square or wide mark works best.": "图片格式为PNG或JPEG，大小不超过512 KB，分辨率不超过4000×4000。展示尺寸约为28–150像素，因此方形或宽幅标志效果最佳。",
+                "Header branding name": "页眉品牌名称",
+                "PNetLab": "PNetLab",
+                "Replaces the": "替换顶部栏", "name in the top bar, the login page and browser tab titles. Leave blank to use the default.": "登录页面和浏览器标签标题中的“PNetLab”名称。留空则使用默认名称。",
+                "Login page header": "登录页面标题栏",
+                "One line of plain text shown above the sign-in form. Visible to anyone who can reach the login page, including before sign-in.": "登录页面上方显示的一行纯文本。任何能够访问登录页面的人，包括登录前的人，都能看到。",
+                "Footer text": "页脚文本",
+                "Replaces the footer at the bottom of this menu (normally the name and version) and the small note under the login form. Leave blank to use the defaults.": "替换此菜单底部的页脚（通常为名称和版本）以及登录表单下方的小注释。若留空，则使用默认设置。",
+                "Hide the": "在登录页面隐藏","message from the login page": "的信息",
+                "Hide the PNetLab version menu from non-admin members": "对非管理员成员隐藏PNetLab版本菜单",
+                "Non-admin users no longer see the version link at the bottom of this menu or the Version page. A custom footer text still shows for them, as plain text. Admins always keep it.": "非管理员用户将不再看到此菜单底部或版本页面上的版本链接。对于他们来说，自定义页脚文本仍以纯文本形式显示。管理员始终保留该链接。",
+                "Reset to defaults": "重置为默认值",
+
+
+
+                "Users & Roles": "用户与角色",
+                "Users": "用户",
+                "External Auth": "外部认证",
+                "Email": "邮箱",
+                "Role": "角色",
+                "Roles": "角色",
+                "Auth": "认证方式",
+                "Authentication": "认证方式",
+                "Limits": "限制",
+                "Add user": "添加用户",
+                "Add role": "添加角色",
+                "Role name": "角色名称",
+                "Default workspace": "默认工作区",
+                "RAM limit": "内存限制",
+                "Disk limit": "磁盘限制",
+                "Permissions": "权限",
+                "built-in": "内置用户",
+                "Only Admin is available — create a role in the Roles tab to add restricted users.": "仅Admin可用，请在“角色”选项卡中创建一个角色以添加受限用户。",
+                "Add user": "添加用户",
+                "Workspace folder (blank = role default)": "工作区文件夹（留空则使用角色默认路径）",
+                "Max CPU (vCPUs)": "CPU数量限制(vCPUs)",
+                "Max RAM (MB)": "内存大小限制(MB)",
+                "unlimited": "无限制",
+                "Lab-access days (none checked = any day)": "实验室准入日（未勾选=无限制）",
+                "Note": "备注",
+                "Add Folder": "添加文件夹",
+                "Add Lab": "添加实验",
+                "Rename Lab": "重命名实验",
+                "Import Lab": "导入实验",
+                "Join Lab": "加入实验",
+                "Edit Folder": "编辑文件夹",
+                "Edit Lab": "编辑实验",
+                "Clone Lab": "关闭实验",
+                "Export Lab": "导出实验",
+                "Edit Tasks": "编辑任务",
+                "Delete Folder": "删除文件夹",
+                "Delete Lab": "删除实验",
+                "Move Lab": "移动实验",
+                "Open Lab": "打开实验",
+                "Online means a valid signed-in session. Last login is shown in your local time.": "最后登录时间以您的本地时间为准。",
+                "Lab schedule": "实验室时间表",
+                "Account": "账户状态",
+                "active": "启用",
+                "Active": "启用",
+                "Disabled": "禁用",
+                "disabled": "禁用",
+                "Send a welcome email with a set-password link": "发送一封包含设置密码链接的欢迎邮件",
+                "Login status": "登录状态",
+                "Last login": "最近一次登录",
+
+
+                "Mail": "邮件",
+                "SMTP settings": "SMTP设置",
+                "Configure": "配置",
+                "Encryption": "加密",
+                "STARTTLS": "STARTTLS",
+                'SMTP must be enabled and configured before an account can be created with "send a welcome email" checked.': '在创建勾选“发送欢迎邮件”的账户之前，必须先启用并配置SMTP。',
+                "password-reset email delivery is unavailable": "密码重置邮件发送不可用",
+                "username not set": "用户名未设置",
+                "Enabled SMTP requires a host and from address": "启用SMTP需要指定主机和发件人地址",
+                "Account creation email": "账户创建邮件",
+                'Subject and body of the "set your password" email sent when a new user is created with "send a welcome email" checked.': '当勾选“发送欢迎电子邮件”选项创建新用户时，会发送一封“设置密码”电子邮件，该邮件的主题和正文内容如下。',
+                "Encryption": "加密",
+                "Request password reset email": "请求密码重置邮件",
+                "Subject and body sent by the Reset password button for an existing user.": "通过“重置密码”按钮为现有用户发送的主题和正文。",
+                "Subject": "主题",
+                "Body": "正文",
+                "Send a test email": "发送一封测试邮件",
+                "Sends a real message through the settings above — use this to confirm the server accepts them before relying on it for account-creation emails.": "通过上述设置发送一条真实信息——在依赖该服务器发送账户创建邮件之前，使用此信息确认服务器是否接受这些信息。",
+                "Send to": "发送至",
+                "Send test email": "发送测试邮件",
+                " Save template": "保存模板",
+
+
+                "Logs": "日志",
+                "Lab & node activity": "实验室与节点活动",
+                "Search logs": "搜索日志",
+                "Lab destroyed": "关闭实验室",
+                "Node created": "创建节点",
+                "Lab created": "创建实验室",
+                "Node wiped": "节点格式化",
+                "Lab deleted": "删除实验室",
+                "Node deleted": "删除节点",
+                "Node duplicated": "复制节点",
+                "Node renamed": "重命名节点",
+                "Joined lab": "加入实验室",
+                "When": "时间",
+                "User": "用户",
+                "Event": "事件",
+                "Next": "下一页",
+                "Previous": "上一页",
+                "User sessions": "用户会话",
+                "Session length": "会话时长",
+                "Logged in": "登录",
+                "Logged out": "登出",
+                "idle timeout": "空闲超时",
+
+
+
+                "MCP server": "MCP服务器",
+                "MCP service": "MCP服务",
+
+
+//右键设备菜单栏
+                "Start": "启动",
+                "Duplicate": "复制设备",
+                "Stop": "停止",
+                "Pause/Resume links": "暂停/恢复链接",
+                "Erase saved node state (factory reset)": "清除已保存的节点状态（恢复出厂设置）",
+                "Console (2nd)": "辅助控制台",
+                "Capture": "抓包",
+                "Resource graph": "资源图表",
+                "Rename node": "重命名节点",
+                "Edit": "编辑",
+                "Export CFG": "导出配置",
+                "Shutdown": "关机",
+                "Hibernate": "休眠",
+                "Freeze": "冻结",
+                "Commit to disk": "提交到磁盘",
+                "Save this node’s disk changes as a new image, or into the current one": "将此节点的磁盘更改保存为新镜像，或保存到当前镜像中",
+                "Persist the changes": "保存","has written to its disk.": "已写入磁盘的更改。",
+                "Current image": "当前镜像",
+                "Save as a new image": "保存为新镜像",
+                "Writes a new image and leaves the current one untouched. Other labs are unaffected.": "写入新镜像，并保持当前镜像不变。其他实验室不受影响。",
+                "new-image-name": "新镜像名称",
+                "Appears in the image list as a new template image.": "在镜像列表中显示为新的镜像模板。",
+                "Commit into the current image": "提交到当前镜像",
+                "Rewrites": "覆盖",
+                "itself. Every node in": "","every lab": "",
+                "using it inherits these changes, including labs that already exist.": "使用它的每个实验室中的每个节点都会继承这些更改，包括已经存在的实验室。",
+                "The node must be stopped. Large disks can take several minutes.": "必须停止该节点。大型磁盘可能需要几分钟时间。",
+                "Save new image": "保存为新镜像",
+                "Overwrite the image": "覆盖当前镜像",
+                "Node has never been started, so it has no changes to commit": "节点从未启动过，因此没有要提交的更改",
+                "Stop the node first — its disk is in use while it runs": "磁盘正在使用中，请先停止节点",
+                "Paint a protocol's computed forwarding picture onto the canvas.": "将协议的计算转发图绘制到画布上。",
+                "Topology Overlays": "Topology Overlays",
+                "Protocol": "协议",
+                "STP Port Roles": "STP Port Roles",
+                "No samples yet — a node needs ~60 s of runtime before its first sample.": "目前还没有样本，一个节点在获取第一个样本之前需要大约60秒的运行时间。",
+                "30 s samples · CPU is % of one core (multi-vCPU nodes can exceed 100%).": "30秒样本 · CPU占一个核心的百分比（多vCPU节点可超过100%）。",
+                "peak": "峰值",
+                "STP Port Roles": "STP Port Roles",
+
+
+
+//多选设备 右键设备菜单栏
+                "Start selected": "启动所选项目",
+                "Open consoles": "打开控制台",
+                "Duplicate selected ": "复制所选项目",
+                "Stop selected": "停止所选项目",
+                "Wipe selected": "Wipe所选项目",
+                "selected node(s)? This erases their saved configuration and disk state (factory reset).": "个选定节点吗？这将清除它们保存的配置和磁盘状态（恢复出厂设置）。",
+                "Bulk Edit Selected": "编辑所选项目",
+                "Console type": "控制台类型",
+                "CPU / RAM changes take effect after the node is stopped and its disk wiped.": "CPU/RAM的更改会在节点停止运行且Wipe后生效。",
+                "Icon & console apply immediately.": "图标会立即应用，控制台需要关闭设备。",
+                "Bulk Edit Selected": "编辑所选项目",
+
+                "Tag selection": "标记设置",
+                "Smart annotations": "智能标记",
+                "Show smart annotations": "显示智能标记",
+                "Shape": "形状",
+                "Rectangle": "矩形",
+                "Rounded": "圆角",
+                "Hull": "多边形",
+                "Fill": "填充",
+                "Border": "边框",
+                "Border style": "边框样式",
+                "Dotted": "点线",
+                "Thickness": "宽度",
+                "Padding": "内边距",
+                "Group distance": "群体距离",
+                "Label font": "标签字体",
+                "Bold": "加粗",
+                "Italic": "斜体",
+
+                "Tags in this lab": "实验室中的标签",
+                "Remove from all": "删除所选标签",
+                "selected object(s)? This removes them from the lab and frees their disk.": "个选定对象？此操作会将它们从实验室中移除，并释放其占用的磁盘空间。",
+
+                "Add to all": "添加到所有设备",
+                "Delete selected": "删除所选项目",
+                "Align horizontal": "水平对齐",
+                "Align vertical": "垂直对齐",
+                "switch HTML5 Console": "switch HTML5 Console",
+                "Opening": "Opening",
+
+
+
+//乱七八糟，未必使用到
+                "Create": "创建",
+                "Save": "保存",
+                "Cancel": "取消",
+                "Confirm": "确认",
+                "Restart": "重启",
+                "Terminal": "终端",
+                "Connect": "连接",
+                "Disconnect": "断开连接",
+                "Upload": "上传",
+                "Download": "下载",
+                "Remove": "移除",
+                "Apply": "应用",
+                "Reset": "重置",
+                "Status": "状态",
+                "Running": "运行中",
+                "Stopped": "已停止",
+                "Connected": "已连接",
+                "Disconnected": "已断开",
+                "Enabled": "已启用",
+                "Name": "名称",
+                "Description": "描述",
+                "IP Address": "IP 地址",
+                "Port": "端口",
+                "Topology": "拓扑",
+                "Device": "设备",
+                "Devices": "设备",
+                "Template": "模板",
+                "Templates": "模板",
+                "Wireshark": "Wireshark",
+
+
+//拓扑无设备
+                "Empty lab": "空实验室",
+                "Nothing here yet. Add a node to start building your topology.": "添加一个节点开始构建你的拓扑结构。",
+                "Right-click the canvas for objects": "在画布上右键单击",
+                "drag a node's corner dot to link": "拖动节点的角点进行链接",
+                "Add your first node": "添加第一个节点",
+                "Empty lab": "空实验室",
+                "Empty lab": "空实验室",
+
+
+
+//顶端居中菜单栏
+                "Start All": "启动所有设备",
+                "Stop All": "停止所有设备",
+                "erase every node's saved state (factory reset)": "清除每个节点保存的状态（恢复出厂设置）",
+                "Warning": "警告",
+                "Wipe all nodes? This erases every node's saved configuration and disk state (factory reset). This cannot be undone.": "清除所有节点？此操作将擦除每个节点保存的配置和磁盘状态（恢复出厂设置）。此操作无法撤销。",
+                "Console All": "打开所有控制台",
+                "Open the web console with every node as a tab (combined)": "将每个节点作为一个标签页（合并）打开网页控制台",
+                "Export CFGs": "导出配置",
+                "Add Node": "添加节点",
+                "Pan": "平移",
+                "Pan (hand tool)": "使用平移（手动工具）",
+                "drag the canvas to move the view;": "拖动画布以移动视图;",
+                "toggle off to edit. Ctrl+left-drag pans in either mode.": "在任一模式下，按住Ctrl键并左键拖动均可进行平移",
+                "Fullscreen": "全屏",
+                "Fullscreen (whole browser tab)": "全屏（整个浏览器标签页）",
+                "Annotations": "标记",
+                "draw shapes, text and cards on the canvas": "在画布上绘制形状、文本和卡片",
+
+
+//右键菜单栏
+                "Add an Object": "添加对象",
+                "ADD A NEW OBJECT": "添加一个新的对象",
+                "Nodes": "节点",
+                "Node": "节点",
+                "List of Nodes": "节点管理",
+                "Add a new node": "添加一个新的节点",
+                "Search templates": "搜索模板",
+                "ADD A NEW NETWORK": "添加新网络",
+                "Number of networks to add": "要添加的网络数量",
+                "Name/Prefix": "名称",
+                "Type": "类型",
+                "Size (px)": "大小(px)",
+                "Icon": "图标",
+                "Icons": "图标",
+                "Upload icons": "上传图标",
+                "Polygon": "多边形",
+                "Custom Shape": "自定义形状",
+                "Shape Selection": "选择形状",
+                "Shape Settings": "形状设置",
+                "Shape name": "形状名称",
+                "Border Type": "边框类型",
+                "Border Width": "边框宽度",
+                "Border Color": "边框颜色",
+                "Background Color": "背景颜色",
+                "Add Shape": "添加",
+                "Freeform": "自由绘图",
+                "Text": "文本",
+                "Line": "线",
+                "Add Line": "添加线",
+                "Live Preview": "实时预览",
+                "Arrow Style": "箭头样式",
+                "Single Arrow": "单箭头",
+                "Double Arrows": "双箭头",
+                "Arrows": "箭头样式",
+                "Single": "单箭头",
+                "Double": "双箭头",
+                "None": "无",
+                "Label": "标签",
+                "Label Size": "标签大小",
+                "Width": "宽度",
+                "Color": "颜色",
+                "Image Store": "镜像商店",
+                "Hide installed": "隐藏已安装",
+                "Images download straight to their addon path. Large files can take a while — you can keep working.": "镜像会直接下载到对应路径。大文件可能需要一段时间。",
+
+
+//右键线条
+                "Colour": "颜色",
+                "Line Style": "线条样式",
+                "Solid": "实线",
+                "Dashed": "虚线",
+                "Edit Style": "编辑样式",
+                "Animate": "动画",
+                "dashes flow": "虚线流动",
+
+
+//右键图形编辑
+                "Object Style": "对象样式",
+                "solid": "实线",
+                "dashed": "虚线",
+                "Background": "背景颜色",
+                "Opacity": "透明度",
+                "Transparent": "透明",
+                "no background": "无背景填充",
+                "Rotation": "旋转",
+
+
+//右键网络线路
+                "Advanced WAN (netem)": "高级广域网(netem)",
+                "Protocol Inspector": "协议检查器",
+                "BGP Best-Path Finder": "BGP最佳路径查找器",
+                "Neither endpoint of this link is a running node with a serial console, so": "此链路的两个端点都不是带有串行控制台的正在运行的节点，因此无法在此运行", "can't be run here.": "命令。",
+                "Reading the BGP table": "正在读取BGP表",
+                "could not reach an exec prompt (login failed or console busy)": "无法获取到执行提示符（登录失败或控制台繁忙）",
+                "Hide link": "隐藏链路",
+                "Unhide link": "显示链路",
+                "Suspend/Resume": "暂停/恢复",
+                "Delete link": "删除链路",
+                "Suspend": "暂停",
+                "Suspend Full link": "暂停整条链路",
+                "Choose a protocol and press": "选择一个协议，然后按下“", "to watch the conversation on this link as it unfolds.": "”即可在此链接上观看对话的展开过程。",
+                "Edit link": "编辑链路",
+                "Line style": "线条样式",
+                "Dash-dot": "点横线",
+                "Curve": "曲线",
+                "Link label": "链路标签",
+                "Label size": "标签大小",
+                "Label angle": "标签角度",
+                "Horizontal": "横向",
+                "Along link": "沿着链路",
+                "Drag the link's label on the canvas while this panel is open.": "在此面板打开时，将链接标签拖到画布上。",
+                "Straight": "直线",
+                "Bezier": "贝塞尔曲线",
+                "Flowchart": "流程图",
+                "State Machine": "状态机",
+                "Along link": "沿着链路",
+
+
+//左侧悬浮栏
+                "Zoom In": "放大",
+                "Zoom Out": "缩小",
+                "Fit View": "最佳视图",
+                "Toggle Interactivity": "锁定拓扑",
+                "Show minimap": "显示缩略图",
+                "Hide minimap": "隐藏缩略图",
+                "Show traffic glow": "打开流量可视化",
+                "Hide traffic glow": "关闭流量可视化",
+                "Show link utilization": "显示链路利用率",
+                "Hide link utilization": "隐藏流量可视化",
+                "Isometric nodes (3D)": "3D模式",
+                "Flat nodes (2D)": "2D模式",
+
+
+                "Help & legend": "帮助",
+
+
+//左侧伸缩栏
+                "Setup Nodes": "节点控制",
+                "Start All Nodes": "启动所有节点",
+                "Stop All Nodes": "停止所有节点",
+                "Config Nodes": "节点管理",
+                "Image": "镜像",
+                "Actions": "操作",
+                "Wipe All Nodes": "将所有节点恢复到出厂设置",
+                "Console To All Nodes": "连接到所有节点的控制台",
+                "Export all CFGs": "导出所选节点配置",
+                "Set Nodes Startup-cfg To Exported": "启用所选节点配置模板",
+                "Set Nodes Startup-cfg To None": "关闭所选节点配置模板",
+                "Delete All Startup-cfg": "删除所有配置模板",
+
+
+                "Startup Configs": "启动配置",
+                "Startup Configurations": "启动配置",
+                "Select a node to view its startup configuration.": "选择一个节点查看其启动配置。",
+                "Change All": "更改全部",
+                "Ace Editor": "Ace Editor",
+                "Make transparent": "透明化",
+
+
+                "SDWAN Lab Builder": "SDWAN实验构建器",
+                "Pictures": "拓扑图",
+                "Refresh Topology": "刷新拓扑",
+                "Destroy Lab": "关闭实验",
+                "Close Lab": "返回主界面",
+
+
+                "Lab Tasks": "实验任务",
+                "No tasks yet": "暂无任务",
+                "Task Management": "任务管理",
+                "Tasks": "任务",
+                "New task": "新任务",
+                "No Task Selected": "暂时没有任务",
+                "Select a task from the list to view its content.": "从列表中选择一个任务查看其内容。",
+                "No instructions yet": "暂无任务要求",
+                "Choose Edit to write this task.": "点击“编辑”以编写此任务。",
+                "Attach PDF": "上传PDF",
+                "Editing instructions": "编辑任务说明",
+                "All changes saved": "所有更改已保存",
+                "Unsaved changes": "更改未保存",
+                "Save task": "保存任务",
+                "Rename task": "重命名任务",
+                "Duplicate task": "复制任务",
+                "Delete task": "删除任务",
+                "Task Validator": "任务验证器",
+                "No validation activities": "无校验操作",
+                "An author must add checks before this lab can be validated.": "在验证此实验之前，作者必须添加检查。",
+                "Validation Authoring": "验证规则设计",
+                "Validation activities": "验证项目",
+                "Build guided checks beside the existing task instructions. Checks run only when a learner or author starts them.": "在现有任务说明旁边构建引导性检查。检查仅在学习者或作者启动时运行。",
+                "Activities": "项目",
+                "Create an activity to start a guided validation.": "创建一个项目来启动引导式验证。",
+                "No activity selected": "未选择项目",
+                "New activity": "新项目",
+                "Validation YAML exported.": "验证YAML已导出。",
+                "Preview": "预览",
+                "Validation": "验证",
+                "Review the parsed file, then apply it to this lab.": "检查解析后的文件，然后将其应用于本次实验。",
+                "No unresolved node references": "所有节点引用都已正确解析",
+                "The server will validate the revision and schema again when you apply the import.": "在您应用导入时，服务器将再次验证修订和架构。",
+                "Apply import": "应用导入",
+                "Validation YAML imported.": "验证YAML已导入。",
+                "Import validation YAML": "导入验证 YAML",
+                "New validation activity": "新验证项目",
+                "New activity is ready to edit. Save when the checks are complete.": "新活动已准备好进行编辑。检查完成后请保存。",
+                "Activity title": "项目标题",
+                "Task points": "任务要点",
+                "Related task": "相关任务",
+                "Instructions": "说明",
+                "Standalone activity": "独立任务",
+                "Checks": "检查",
+                "Add check": "添加检查",
+                "Run buttons test the current lab immediately; they never mark a result without a server evaluation.": "点击运行按钮会立即测试当前实验室，在未经服务器评估的情况下不会标记结果。",
+                "An activity needs at least one check.": "项目中至少存在一个检查。",
+                "Check type": "检查类型",
+                "Source node": "源节点",
+                "Select a node": "选择一个节点",
+                "Target IPv4": "目标IPv4地址",
+                "Packets": "数据包数量",
+                "Payload bytes": "数据载荷字节",
+                "Max loss": "最大损失",
+                "Min replies": "最小回复数",
+                "Do not fragment: No": "不要分片：否",
+                "Do not fragment: Yes": "不要分片：是",
+                "Expected result: Reachable": "预期结果：可达",
+                "Expected result: Unreachable": "预期结果：不可达",
+                "Save before testing this check": "测试前请先保存",
+                "Unsaved validation changes": "未保存的验证更改",
+                "Test check": "测试检查",
+                "No test run yet": "暂未进行测试",
+                "Save validation": "保存验证",
+                "Choose a source node for": "选择一个源节点给",
+                "ping target is required": "需要指定目标IPv4地址",
+                "unknown: Could not verify complete ping output": "未知：无法验证完整的ping输出，检查IP地址配置",
+                "failed: Ping did not meet the expected reachability": "失败：Ping 未达到预期的可达性",
+                "passed: Ping check passed": "成功：Ping检查已通过",
+                "Validation activities saved.": "验证项目已保存。",
+                "ping minimum replies must be between": "ping的最小回复数必须在",
+                "Max hops": "最大跳数",
+                "Required hops": "所需跳数",
+                "passed: Trace check passed": "成功：Trace检查已通过",
+                "failed: Trace did not meet the expected path": "失败：跟踪未达到预期路径",
+                "Record type": "记录类型",
+                "DNS name": "DNS名称",
+                "CNAME": "CNAME",
+                "DNS server IPv4": "DNS服务器IPv4地址",
+                "Expected answer": "预期答复",
+                "Answer contains": "答复内容",
+                "Expected result: Answer exists": "预期结果：存在",
+                "Expected result: No answer": "预期结果：不存在",
+                "dns name is required": "需要提供DNS名称",
+                "unknown: DNS result was unavailable or malformed": "未知：DNS结果不可用或格式错误",
+                "TCP connection": "TCP连接",
+                "TCP port": "TCP端口",
+                "failed: TCP connection did not meet the expected reachability": "失败：TCP连接未达到预期的可达性",
+                "passed: TCP connection check passed": "成功：TCP连接检查已通过",
+                "unknown: Could not verify TCP connection result": "未知：无法验证TCP连接结果",
+                "Default gateway": "默认网关",
+                "Expected result: No gateway": "预期结果：不可达",
+                "passed: Gateway check passed": "成功：网关检查已通过",
+                "failed: Gateway did not meet the expected reachability": "失败：网关未达到预期的可达性",
+                "MTU probe": "MTU探测",
+                "Expected MTU": "预期最大MTU",
+                "Expected result: Does not match": "预期结果：不匹配",
+                "Expected result: Matches": "预期结果：匹配",
+                "failed: MTU check did not meet the expected result": "失败：MTU检查未达到预期结果",
+                "passed: MTU and no-fragment probe passed": "成功：MTU和无碎片探测已通过",
+                "passed: MTU or no-fragment probe did not meet the expectation": "失败：MTU或无分段探测未达到预期",
+                "mtu size must be between": "MTU大小必须在",
+                "Activity": "项目",
+                "Lab progress": "实验进展",
+                "points": "要点",
+                "passed ·": "成功 ·",
+                "failed ·": "失败 ·",
+                "unknown · ": "未知 · ",
+                "error · ": "错误 ·",
+                "Not run": "未运行",
+                "not run": "未运行",
+                "Run starts a fresh server evaluation for this learner.": "运行此命令将启动一次新的实验评估。",
+                "Run all checks": "运行所有检查",
+                "Passed": "已通过",
+                "Check": "检查",
+                "checks run sequentially": "按顺序进行检查",
+                "Server evaluation in progress": "正在进行检查",
+                "Activity removed locally. Save to apply the change.": "活动已在本地删除。请保存以应用更改。",
+                "All activities are queued for removal. Save to apply the empty validation file.": "所有活动都已排队等待删除。请保存以应用验证文件。",
+
+
+
+                "Open Task Management": "打开任务管理",
+                "AI Lab Builder": "AI构建实验",
+                "System Status": "系统状态",
+                "Loading": "加载中",
+                "Mini Map": "缩略图",
+                "Network Watcher": "网络观察器",
+                "Close Network Watcher": "关闭网络观察器",
+                "Protocol Painter": "协议绘制工具",
+                "Rack View": "机架视图",
+                "Sketch": "画笔",
+                "Layout Settings": "布局设置",
+                "Resource Monitor": "资源监视器",
+                "Traffic Glow": "流量可视化",
+                "Link Labels": "链路标签",
+                "Icon Resizer": "图标缩放",
+                "Web Console Tab": "网页标签控制台",
+                "HTML5 Console": "HTML5控制台",
+                "Quick Bar": "快捷栏",
+                "Sticky Sidebar": "固定侧边栏",
+                "Grid": "网格",
+                "Reset to Global": "重置为全局设置",
+                "Canvas: Light": "画布：明亮",
+                "Canvas: Dark": "画布：深色",
+
+
+//设备参数
+                "Back to templates": "返回模板",
+                "ADD A NEW NODE": "添加新节点",
+                "Main Settings": "主设置",
+                "Number of Nodes": "要添加的节点数量",
+                "Config": "配置",
+                "Exported": "Exported",
+                "Console": "控制台",
+                "Terminal type": "终端类型",
+                "Backspace": "退格键行为",
+                "Terminal type": "终端类型",
+                "Additional Settings": "附加设置",
+                "QEMU Settings": "QEMU设置",
+                "QEMU arch": "QEMU架构",
+                "QEMU NIC": "QEMU网卡类型",
+                "QEMU version": "QEMU版本",
+                "QEMU options": "QEMU参数",
+                "Ethernet": "网口数量",
+                "Pci mode": "Pci模式",
+                "Firstmac": "主网卡MAC",
+                "First nic": "主网卡类型",
+                "Console 2nd": "辅助控制台",
+                "Map port": "控制台映射端口",
+                "Map port 2nd": "辅助控制台映射端口",
+                "First nic": "主网卡类型",
+                "Delay": "延迟",
+                "Config script": "配置脚本",
+                "Script timeout": "脚本超时时间",
+                "Save as template default": "保存为默认模板",
+                "Revert to factory": "恢复出厂设置",
+                "CPU limit (exact 1 = quota after 60s grace: 50%/vCPU + 50% headroom; otherwise weight-only)": "",
+                "Inject as first nic": "作为第一个网卡注入",
+
+
+//其他
+                "Add connection": "添加链路",
+                "Delete this shape?": "是否删除这个图形？",
+                "Send to front": "置于顶层",
+                "Send to back": "置于底层",
+
+
+//消息告警类
+                "Message History": "历史消息",
+                "Clear history": "清除历史",
+                "Close": "关闭",
+                "No messages yet.": "目前没有消息",
+                "started": "启动",
+                "stopped": "停止",
+                "shutdown": "关机",
+                "Export all:done": "导出全部: 已完成",
+                "Export all: Starting": "全部导出: 运行中",
+                "Export not supported": "不支持导出",
+                "Failed to export config": "配置导出失败",
+                "Starting export, please wait": "正在导出，请稍候",
+                "config exported": "配置已导出",
+                "Failed to export config": "配置导出失败",
+                "Create connection successfully": "链路创建成功",
+                "Pause/Resume all_nics": "暂停/恢复所有网卡",
+                "Unable to create file": "无法创建文件",
+                "because Permission denied": "因为权限被拒绝",
+                "Freeform added.": "图形添加成功。",
+                "Node crashed on boot": "节点在启动时崩溃",
+                "The container started but stopped unexpectedly (exited with code 143). The image may be corrupt or misconfigured.": "容器已启动，但意外停止（退出代码为143）。镜像可能已损坏或配置错误。",
+                "Suggested fix": "修改建议",
+                "Wipe the node and reload it, then Start again.": "清除节点并重新加载，然后再次启动。",
+                "Wipe & reload": "清除 & 重启",
+                "Polygon: click to add points": "多边形：点击添加点",
+                "double-click / Enter / click start to finish": "双击/回车/点击开始到结束",
+                "Esc to cancel": "按Esc取消",
+                "No pictures in this lab": "该沙箱中不存在逻辑拓扑图",
+                "No Wireless AP / STA nodes in this lab": "实验室没有无线AP/STA节点",
+                "node duplicated": "个节点被复制",
+                "Freeze/Unfreeze": "冻结/解冻",
+
+            }
+        },
+        {
+//使用率
+            match: /\/main\/#\/history/,
+            dict: {
+                "days": "天",
+                "hr": "小时",
+                "min": "分钟",
+                "sec": "秒",
+            }
+        },
+        {
+//用户与角色
+            match: /\/main\/#\/users/,
+            dict: {
+                "users": "个用户",
+                "Offline": "离线",
+                "Online": "在线",
+                "Reset password": "重置密码",
+                "Access from (date & time; blank = no start)": "访问开始时间（日期 & 时间；空白表示未开始）",
+                "Access to (blank = no end)": "访问结束时间（空白处表示无限制）",
+                "Add user": "添加用户",
+                "Edit user": "编辑用户",
+                "New password (blank = keep)": "新密码（留空=保留原密码）",
+                "Mon": "星期一",
+                "Tue": "星期二",
+                "Wed": "星期三",
+                "Thu": "星期四",
+                "Fri": "星期五",
+                "Sat": "星期六",
+                "Sun": "星期天",
+                "Full access": "完全访问权限"
+            }
+        }
+//       {
+// 示例：仅在包含 /admin 或 管理后台 路径下生效
+//            match: /admin|users|roles/i,
+//            dict: {
+//                "Admin": "管理员",
+//                "System": "系统设置",
+//            }
+//        },
+//        {
+// 示例：仅在包含 mail 或 smtp 路径下生效
+//            match: /mail|smtp/i,
+//            dict: {
+//                "SMTP settings": "SMTP设置",
+//                "Status": "状态",
+//            }
+//        }
+    ];
+// 用单引号包裹 → 内部双引号不需要转义
+// 'Subject and body of the "set your password" email sent when a new user is created with "send a welcome email" checked.':'创建新用户并勾选"发送欢迎邮件"时，发送的"设置密码"邮件的主题和正文如下。',
+// 用\包裹 → 内部双引号不需要转义
+//"Pull any Docker Hub image by reference — not just the catalog above. Accepts a bare ref or a pasted \"docker pull …\" command.": "拉取Docker Hub的镜像。接受裸引用或粘贴的“docker pull …”命令。",
+
+    // =========================================================
+    // 翻译引擎（动态构建）
+    // =========================================================
+    let entries = [];
+    let translateRegex = null;
+
+    function escapeRegExp(text) {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function buildSource(key) {
+        return escapeRegExp(key)
+            .replace(/"/g, '["\\u201C\\u201D]')
+            .replace(/ +/g, '\\s+');
+    }
+
+    // 根据当前 URL 重新合并字典并构建正则
+    function updateTranslator() {
+        const url = location.href;
+        let mergedDict = {};
+
+        for (let i = 0; i < dictScopes.length; i++) {
+            const scope = dictScopes[i];
+            if (scope.match.test(url)) {
+                Object.assign(mergedDict, scope.dict);
+            }
+        }
+
+        const keys = Object.keys(mergedDict).sort(function (a, b) {
+            return b.length - a.length;
+        });
+
+        entries = keys.map(function (key) {
+            const source = buildSource(key);
+            return {
+                source: source,
+                testRe: new RegExp("^" + source + "$"),
+                value: mergedDict[key]
+            };
+        });
+
+        translateRegex = entries.length
+            ? new RegExp(entries.map(function (e) { return e.source; }).join("|"), "g")
+            : null;
+    }
+
+    function translate(text) {
+        if (!text || !translateRegex) return text;
+        return text.replace(translateRegex, function (match) {
+            for (let i = 0; i < entries.length; i++) {
+                if (entries[i].testRe.test(match)) return entries[i].value;
+            }
+            return match;
+        });
+    }
+
+    // =========================================================
+    // 跳过区域与匹配规则
+    // =========================================================
+    const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "TEXTAREA", "PRE", "CODE"]);
+    const ATTRS = ["title", "placeholder", "aria-label", "alt"];
+
+    function isSkipped(el) {
+        let node = el;
+        while (node && node.nodeType === 1) {
+            if (SKIP_TAGS.has(node.tagName)) return true;
+            node = node.parentNode;
+        }
+        return false;
+    }
+
+    const writtenText = new WeakMap();
+    const writtenAttr = new WeakMap();
+    const writtenWholeText = new WeakMap();
+
+    const textQueue = new Set();
+    const elemQueue = new Set();
+    let scheduled = false;
+
+    function queueTextNode(node) {
+        if (node && node.nodeType === 3 && node.isConnected) textQueue.add(node);
+    }
+    function queueElement(el) {
+        if (el && el.nodeType === 1 && el.isConnected) elemQueue.add(el);
+    }
+
+    function collectTree(root) {
+        queueElement(root);
+        const walker = document.createTreeWalker(
+            root,
+            NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+            null
+        );
+        let n = walker.nextNode();
+        while (n) {
+            if (n.nodeType === 1) queueElement(n);
+            else if (n.nodeType === 3) queueTextNode(n);
+            n = walker.nextNode();
+        }
+    }
+
+    function processTextNode(node) {
+        if (!node.isConnected) return;
+        const parent = node.parentNode;
+        if (!parent || isSkipped(parent)) return;
+
+        const oldText = node.nodeValue;
+        if (writtenText.get(node) === oldText) return;
+
+        const newText = translate(oldText);
+        if (oldText !== newText) {
+            writtenText.set(node, newText);
+            node.nodeValue = newText;
+        }
+    }
+
+    function processElementAttrs(el) {
+        if (!el.isConnected || isSkipped(el)) return;
+
+        let written = writtenAttr.get(el);
+        for (let i = 0; i < ATTRS.length; i++) {
+            const attr = ATTRS[i];
+            if (!el.hasAttribute(attr)) continue;
+
+            const oldValue = el.getAttribute(attr);
+            if (written && written[attr] === oldValue) continue;
+
+            const newValue = translate(oldValue);
+            if (oldValue !== newValue) {
+                if (!written) {
+                    written = {};
+                    writtenAttr.set(el, written);
+                }
+                written[attr] = newValue;
+                el.setAttribute(attr, newValue);
+            }
+        }
+    }
+
+    const INLINE_TAGS = new Set([
+        "SPAN", "B", "STRONG", "I", "EM", "U", "S", "SMALL", "CODE", "A", "MARK",
+        "SUP", "SUB", "FONT", "CITE", "Q", "ABBR", "BDI", "BDO", "BR", "WBR",
+        "TIME", "VAR", "KBD", "SAMP", "DFN", "DEL", "INS", "LABEL", "STRIKE", "TT", "BIG"
+    ]);
+
+    function hasNonInlineChild(el) {
+        for (let c = el.firstElementChild; c; c = c.nextElementSibling) {
+            if (!INLINE_TAGS.has(c.tagName)) return true;
+            if (hasNonInlineChild(c)) return true;
+        }
+        return false;
+    }
+
+    function hasIconOrSvg(el) {
+        if (el.tagName === 'SVG' || el.tagName === 'IMG') return true;
+        const cls = el.getAttribute('class') || '';
+        if (/(^|\s|-)icon|(^|\s)(fa|fas|far|fab|mdi|bi|glyphicon|material-icons)/i.test(cls)) return true;
+        for (let c = el.firstElementChild; c; c = c.nextElementSibling) {
+            if (hasIconOrSvg(c)) return true;
+        }
+        return false;
+    }
+
+    const INTERACTIVE_SEL = "a,button,input,select,textarea,[role='button'],[onclick]";
+
+    function processElementWholeText(el) {
+        if (!el.isConnected || isSkipped(el)) return;
+        if (!el.childElementCount) return;
+        if (writtenWholeText.get(el) === el.textContent) return;
+        if (hasNonInlineChild(el)) return;
+        if (el.querySelector(INTERACTIVE_SEL)) return;
+
+        const oldText = el.textContent;
+        if (!oldText || oldText.length > 1000) return;
+
+        const trimmed = oldText.trim();
+        if (trimmed.length < 15) return;
+
+        if (hasIconOrSvg(el)) return;
+
+        let isFullMatch = false;
+        for (let i = 0; i < entries.length; i++) {
+            if (entries[i].testRe.test(trimmed)) {
+                isFullMatch = true;
+                break;
+            }
+        }
+        if (!isFullMatch) return;
+
+        const newText = translate(oldText);
+        if (oldText !== newText) {
+            writtenWholeText.set(el, newText);
+            el.textContent = newText;
+            const t = el.firstChild;
+            if (t && t.nodeType === 3) writtenText.set(t, newText);
+        }
+    }
+
+    function flush() {
+        scheduled = false;
+
+        if (elemQueue.size) {
+            const elems = Array.from(elemQueue);
+            elemQueue.clear();
+            for (let i = 0; i < elems.length; i++) processElementAttrs(elems[i]);
+            for (let i = 0; i < elems.length; i++) processElementWholeText(elems[i]);
+        }
+
+        if (textQueue.size) {
+            const texts = Array.from(textQueue);
+            textQueue.clear();
+            for (let i = 0; i < texts.length; i++) processTextNode(texts[i]);
+        }
+    }
+
+    function schedule() {
+        if (scheduled) return;
+        scheduled = true;
+        if (document.hidden) setTimeout(flush, 0);
+        else requestAnimationFrame(flush);
+    }
+
+    const observer = new MutationObserver(function (mutations) {
+        for (let i = 0; i < mutations.length; i++) {
+            const m = mutations[i];
+            if (m.type === "characterData") {
+                queueTextNode(m.target);
+            } else if (m.type === "attributes") {
+                queueElement(m.target);
+            } else if (m.type === "childList") {
+                for (let j = 0; j < m.addedNodes.length; j++) {
+                    const node = m.addedNodes[j];
+                    if (node.nodeType === 3) queueTextNode(node);
+                    else if (node.nodeType === 1) collectTree(node);
+                }
+            }
+        }
+        schedule();
+    });
+
+    // =========================================================
+    // 路由监听与初始化
+    // =========================================================
+    function onRouteChange() {
+        updateTranslator(); // 根据新路由更新字典
+        if (document.body) {
+            collectTree(document.body); // 重新扫描现有 DOM
+            schedule();
+        }
+    }
+
+    // 拦截 history API，实现 SPA 路由切换感知
+    window.addEventListener('popstate', onRouteChange);
+    window.addEventListener('hashchange', onRouteChange);
+
+    const originalPushState = history.pushState;
+    history.pushState = function () {
+        originalPushState.apply(this, arguments);
+        setTimeout(onRouteChange, 30); // 延迟等待组件渲染
+    };
+
+    const originalReplaceState = history.replaceState;
+    history.replaceState = function () {
+        originalReplaceState.apply(this, arguments);
+        setTimeout(onRouteChange, 30);
+    };
+
+    function start() {
+        if (!document.body) {
+            requestAnimationFrame(start);
+            return;
+        }
+
+        updateTranslator();
+        collectTree(document.body);
+        schedule();
+
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ATTRS
+        });
+
+        console.log("[PNetLab 汉化] 已启动 (v2.0.7 动态作用域隔离)");
+    }
+
+    start();
+})();
